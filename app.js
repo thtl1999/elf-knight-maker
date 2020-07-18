@@ -7,7 +7,7 @@ let minimum_length_value = 9999999
 let minimum_length_substrings = []
 
 
-fetch('/cardnames.json')
+fetch('./cardnames.json')
     .then(response => {
         return response.json();
     })
