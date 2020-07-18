@@ -1,8 +1,10 @@
 let WORD_DB
 let colors = ['color: #730240', 'color: #304173', 'color: #F2CB05', 'color: #594B04', 'color: #0D0D0D']
 let color_index = 0
-const removable_chars = [' ', '·', '－', '.', '「', '」']
+const removable_chars = [' ', '·', '－', '.', '「', '」', '.']
 let unused_substrings = []
+let minimum_length_value = 9999999
+let minimum_length_substrings = []
 
 let test = 'CNo.92 위해허룡 Heart－eartH Chaos Dragon'
 
@@ -13,6 +15,10 @@ fetch('/cardnames.json')
     .then(function(word_json) {
         WORD_DB = [...new Set(word_json)]
     })
+
+function reset_page(){
+    
+}
 
 function get_color(){
     color_index = (color_index + 1) % colors.length
@@ -47,10 +53,64 @@ class Substr{
     }
 }
 
+function display_impossible(user_string, problem_index){
+    console.log('impossible',problem_index)
+}
+
 function make_collage(){
     
     let user_string = document.getElementById('user-string').value
-    
+    let substrings = get_all_substrings(user_string)
+
+    // Check if substrings contain user string
+    for(let i=0;i<user_string.length;i++){
+        let is_possible = substrings.some(substr =>{
+            if(substr.has_index(i))
+                return true
+        })
+        
+        if(!is_possible){
+            display_impossible(user_string, i)
+            return
+        }
+    }
+
+    // Initialize params
+    minimum_length_value = 9999999
+    minimum_length_substrings = []
+
+    // DFS method to find optimal
+    find_minimum(substrings, [], 0)
+    console.log(minimum_length_substrings)
+}
+
+function find_minimum(s, current_substrs, current_index){
+    let substr_has_index = []
+    s.forEach(substr => {
+        if (substr.has_index(current_index))
+            substr_has_index.push(substr)
+    })
+
+    // End of user string (empty array)
+    if (!substr_has_index.length){
+        // Check if this is the new minimum
+        if (current_substrs.length < minimum_length_value){
+            // Update minimum value
+            minimum_length_value = current_substrs.length
+            // Shallow copy current substring array
+            minimum_length_substrings = [...current_substrs]
+        }
+        return
+    }
+
+    substr_has_index.forEach(substr =>{
+        // Find ahead with new substr
+        current_index = substr.user_end + 1
+        current_substrs.push(substr)
+        find_minimum(s, current_substrs, current_index)
+        // Restore sequence data
+        current_substrs.pop()
+    })
 }
 
 function get_all_substrings(user_string){
@@ -66,7 +126,6 @@ function get_all_substrings(user_string){
         })
     })
 
-    console.log(substrings)
     return substrings
 }
 
@@ -84,8 +143,6 @@ function add_substring(substr_array, substr){
         if (substr.is_contain(s.user_start, s.user_end)){
             substr_array.splice(i, 1)
         }
-            
-
     }
 
     // Append substring array
@@ -107,19 +164,30 @@ function get_substrings(user_string, card_name){
             while(card_index + card_strlen < card_name.length && user_index + user_strlen < user_string.length){
                 let card_char = card_name[card_index + card_strlen]
                 let user_char = user_string[user_index + user_strlen]
+                let char_removable = false
                 
-                // Jump removable characters
-                if (is_removable(card_char)){
+                // If next char is removable, include
+                let next_card_index = card_index + card_strlen + 1
+                while(next_card_index < card_name.length && is_removable(card_name[next_card_index])){
                     card_strlen++
-                    continue
+                    next_card_index++
                 }
-                if (is_removable(user_char)){
+                let next_user_index = user_index + user_strlen + 1
+                while(next_user_index < user_string.length && is_removable(user_string[next_user_index])){
                     user_strlen++
-                    continue
+                    next_user_index++
                 }
 
-                if (card_char.toLowerCase() === user_char.toLowerCase()){
-                    // If found substring
+                // If found substring
+                if (card_char.toLowerCase() === user_char.toLowerCase() || char_removable){
+                    // Check if front card
+                    if (user_index == 0 && card_index != 0)
+                        break
+
+                    // Cehck if end card
+                    if (user_index + user_strlen == user_string.length - 1 && card_index + card_strlen != card_name.length - 1)
+                        break
+
                     let substr = new Substr(card_name, card_index, card_index + card_strlen, user_index, user_index + user_strlen)
                     add_substring(substr_array, substr)
                 }
