@@ -1,5 +1,5 @@
 let WORD_DB
-let colors = ['color: #730240', 'color: #304173', 'color: #F2CB05', 'color: #594B04', 'color: #0D0D0D']
+let colors = ['#730240', '#304173', '#F2CB05', '#594B04', '#0D0D0D']
 let color_index = 0
 const removable_chars = [' ', '·', '－', '.', '「', '」', '.']
 let unused_substrings = []
@@ -32,8 +32,54 @@ function get_color(){
     return colors[color_index]
 }
 
-function add_card_result(){
-    
+function add_card_result(user_string){
+    add_p(user_string)
+    add_ol()
+}
+
+function add_p(user_string){
+    let p = document.getElementById('colored-text')
+    color_index = -1
+    let texts = []
+    let start_index = 0
+    minimum_length_substrings.forEach(substr =>{
+        texts.push(substr.get_colored(user_string, start_index))
+        start_index = substr.user_end + 1
+    })
+
+    texts.forEach(text =>{
+        p.appendChild(create_color_span(text))
+    })
+
+}
+
+function add_ol(){
+    let ol = document.getElementById('card-list')
+    color_index = -1
+
+    minimum_length_substrings.forEach(substr =>{
+        let li = document.createElement('li')
+        let [front, middle, end] = substr.get_sliced()
+
+        li.appendChild(create_grey_span(front))
+        li.appendChild(create_color_span(middle))
+        li.appendChild(create_grey_span(end))
+        ol.appendChild(li)
+    })
+}
+
+function create_color_span(text){
+    let span = document.createElement('span')
+    span.innerText = text
+    span.style.color = get_color()
+    return span
+}
+
+function create_grey_span(text){
+    let span = document.createElement('span')
+    span.innerText = text
+    span.style.color = 'lightgrey'
+    return span
 }
 
 class Substr{
@@ -58,14 +104,41 @@ class Substr{
         else
             return false
     }
+
+    get_colored(user_string, start_index){
+        return user_string.substring(start_index, this.user_end + 1)
+    }
+
+    get_sliced(){
+        let front = this.card_name.substring(0, this.card_start)
+        let middle = this.card_name.substring(this.card_start, this.card_end + 1)
+        let end = this.card_name.substring(this.card_end + 1, this.card_name.length)
+
+        return [front, middle, end]
+    }
 }
 
 function display_impossible(user_string, problem_index){
-    console.log('impossible',problem_index)
+    let problem_char = user_string[problem_index]
+
+    let error_text = ' 문자를 가진 카드가 없습니다'
+    if (problem_index === 0)
+        error_text = ' 문자로 시작하는 카드가 없습니다'
+    if (problem_index === user_string.length - 1)
+        error_text = ' 문자로 끝나는 카드가 없습니다'
+
+    color_index = -1
+    let p = document.getElementById('colored-text')
+    p.appendChild(create_color_span(problem_char))
+    p.appendChild(document.createTextNode(error_text))
 }
 
 function make_collage(){
+    // Initialize app
     reset_page()
+    unused_substrings = []
+
+    // Get text from user input and get optimal substrings
     let user_string = document.getElementById('user-string').value
     let substrings = get_all_substrings(user_string)
 
@@ -88,7 +161,12 @@ function make_collage(){
 
     // DFS method to find optimal
     find_minimum(substrings, [], 0)
-    console.log(minimum_length_substrings)
+
+    // Print out to HTML
+    add_card_result(user_string)
+
+    // To prevent page reload
+    return false
 }
 
 function find_minimum(s, current_substrs, current_index){
@@ -173,7 +251,8 @@ function get_substrings(user_string, card_name){
                 let user_char = user_string[user_index + user_strlen]
                 let char_removable = false
                 
-                // If next char is removable, include
+                // If next char is removable, include it
+                // Also check if exceed array length
                 let next_card_index = card_index + card_strlen + 1
                 while(next_card_index < card_name.length && is_removable(card_name[next_card_index])){
                     card_strlen++
