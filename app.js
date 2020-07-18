@@ -40,15 +40,10 @@ function add_card_result(user_string){
 function add_p(user_string){
     let p = document.getElementById('colored-text')
     color_index = -1
-    let texts = []
     let start_index = 0
     minimum_length_substrings.forEach(substr =>{
-        texts.push(substr.get_colored(user_string, start_index))
+        p.appendChild(create_color_span(substr.get_colored(user_string, start_index)))
         start_index = substr.user_end + 1
-    })
-
-    texts.forEach(text =>{
-        p.appendChild(create_color_span(text))
     })
 
 }
@@ -131,6 +126,7 @@ function display_impossible(user_string, problem_index){
     let p = document.getElementById('colored-text')
     p.appendChild(create_color_span(problem_char))
     p.appendChild(document.createTextNode(error_text))
+
 }
 
 function make_collage(){
@@ -151,7 +147,7 @@ function make_collage(){
         
         if(!is_possible){
             display_impossible(user_string, i)
-            return
+            return false
         }
     }
 
