@@ -1,0 +1,31 @@
+body{
+    text-align: center;
+
+}
+
+form{
+    margin-top: 50px;
+    vertical-align: middle;
+}
+
+input{
+    margin-bottom: 10px;
+    width: 500px;
+    max-width: 90vw;
+}
+
+button{
+    font-weight: 600;
+    font-size: x-large;
+}
+
+p{
+    font-size: xx-large;
+}
+
+ol{
+    list-style-type: none;
+    padding-left: 0;
+    list-style-position: inside;
+    font-size: x-large;
+}

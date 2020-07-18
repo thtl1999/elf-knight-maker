@@ -6,7 +6,6 @@ let unused_substrings = []
 let minimum_length_value = 9999999
 let minimum_length_substrings = []
 
-let test = 'CNo.92 위해허룡 Heart－eartH Chaos Dragon'
 
 fetch('/cardnames.json')
     .then(response => {
@@ -16,8 +15,16 @@ fetch('/cardnames.json')
         WORD_DB = [...new Set(word_json)]
     })
 
+function reset_all(){
+    document.getElementById('user-string').value = ''
+    reset_page()
+}
+
 function reset_page(){
-    
+    let p = document.getElementById('colored-text')
+    p.innerText = ''
+    let ol = document.getElementById('card-list')
+    ol.innerHTML = ''
 }
 
 function get_color(){
@@ -26,7 +33,7 @@ function get_color(){
 }
 
 function add_card_result(){
-
+    
 }
 
 class Substr{
@@ -58,7 +65,7 @@ function display_impossible(user_string, problem_index){
 }
 
 function make_collage(){
-    
+    reset_page()
     let user_string = document.getElementById('user-string').value
     let substrings = get_all_substrings(user_string)
 
