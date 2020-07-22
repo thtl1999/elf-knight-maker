@@ -192,6 +192,10 @@ function delete_progress(){
 }
 
 function display_collage(){
+    // Restore buttons
+    document.getElementById('reset-button').disabled = false
+    document.getElementById('start-button').disabled = false
+
     // Check if substrings contain user string
     for(let i=0;i<user_string.length;i++){
         let is_possible = substrings.some(substr =>{
@@ -213,10 +217,6 @@ function display_collage(){
 
     // Print out to HTML
     add_card_result(user_string)
-
-    // Restore buttons
-    document.getElementById('reset-button').disabled = false
-    document.getElementById('start-button').disabled = false
 }
 
 function find_minimum(s, current_substrs, current_index){
