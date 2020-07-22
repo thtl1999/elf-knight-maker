@@ -162,6 +162,8 @@ function get_all_substrings(){
     else{
         // If finished, display
         setTimeout(display_collage)
+        delete_progress()
+        return
     }
 
     // Without epoch, works are so slow
@@ -190,8 +192,6 @@ function delete_progress(){
 }
 
 function display_collage(){
-    delete_progress()
-
     // Check if substrings contain user string
     for(let i=0;i<user_string.length;i++){
         let is_possible = substrings.some(substr =>{
