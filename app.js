@@ -143,6 +143,8 @@ function reset_page(){
 function make_collage_start(){
     // Initialize app
     reset_page()
+    document.getElementById('reset-button').disabled = true
+    document.getElementById('start-button').disabled = true
     user_string = document.getElementById('user-string').value
 
     // Queue work
@@ -174,9 +176,22 @@ function get_all_substrings(){
             add_substring(substrings, card_substring)
         }
     }
+    display_progress()
+}
+
+function display_progress(){
+    const p = document.getElementById('colored-text')
+    p.innerText = `${db_index} / ${WORD_DB.length}`
+}
+
+function delete_progress(){
+    const p = document.getElementById('colored-text')
+    p.innerText = ''
 }
 
 function display_collage(){
+    delete_progress()
+
     // Check if substrings contain user string
     for(let i=0;i<user_string.length;i++){
         let is_possible = substrings.some(substr =>{
@@ -198,6 +213,10 @@ function display_collage(){
 
     // Print out to HTML
     add_card_result(user_string)
+
+    // Restore buttons
+    document.getElementById('reset-button').disabled = false
+    document.getElementById('start-button').disabled = false
 }
 
 function find_minimum(s, current_substrs, current_index){
