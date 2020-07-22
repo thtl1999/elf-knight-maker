@@ -5,6 +5,9 @@ const removable_chars = [' ', '·', '－', '.', '「', '」', '.']
 let unused_substrings = []
 let minimum_length_value = 9999999
 let minimum_length_substrings = []
+let user_string
+let substrings
+let db_index
 
 
 fetch('./cardnames.json')
@@ -18,13 +21,6 @@ fetch('./cardnames.json')
 function reset_all(){
     document.getElementById('user-string').value = ''
     reset_page()
-}
-
-function reset_page(){
-    let p = document.getElementById('colored-text')
-    p.innerText = ''
-    let ol = document.getElementById('card-list')
-    ol.innerHTML = ''
 }
 
 function get_color(){
@@ -129,40 +125,79 @@ function display_impossible(user_string, problem_index){
 
 }
 
-function make_collage(){
+function reset_page(){
+    // Initialize HTML
+    let p = document.getElementById('colored-text')
+    p.innerText = ''
+    let ol = document.getElementById('card-list')
+    ol.innerHTML = ''
+
+    // Initialize params
+    unused_substrings = []
+    substrings = []
+    db_index = 0
+    minimum_length_value = 9999999
+    minimum_length_substrings = []
+}
+
+function make_collage_start(){
     // Initialize app
     reset_page()
-    unused_substrings = []
+    user_string = document.getElementById('user-string').value
 
-    // Get text from user input and get optimal substrings
-    let user_string = document.getElementById('user-string').value
-    let substrings = get_all_substrings(user_string)
+    // Queue work
+    setTimeout(get_all_substrings)
 
+    // To prevent page reloading
+    return false
+}
+
+function get_all_substrings(){
+    // If not finished, queue next work
+    if (db_index < WORD_DB.length){
+        setTimeout(get_all_substrings)
+    }
+    else{
+        // If finished, display
+        setTimeout(display_collage)
+    }
+
+    // Without epoch, works are so slow
+    let epoch = 100
+    let epoch_index = 0
+
+    while(db_index < WORD_DB.length && epoch_index++ < epoch){
+        // find substring for cards
+        let card_substring_array = get_substrings(user_string, WORD_DB[db_index++])
+        for (const card_substring of card_substring_array){
+            // Try add to substring in array
+            add_substring(substrings, card_substring)
+        }
+    }
+}
+
+function display_collage(){
     // Check if substrings contain user string
     for(let i=0;i<user_string.length;i++){
         let is_possible = substrings.some(substr =>{
             if(substr.has_index(i))
                 return true
+            // If return true, go to next iteration
+            // If all the iteration is true, is_possible = true
+            // If return false in a iteration, is_possible = false
         })
         
         if(!is_possible){
             display_impossible(user_string, i)
-            return false
+            return
         }
     }
-
-    // Initialize params
-    minimum_length_value = 9999999
-    minimum_length_substrings = []
 
     // DFS method to find optimal
     find_minimum(substrings, [], 0)
 
     // Print out to HTML
     add_card_result(user_string)
-
-    // To prevent page reload
-    return false
 }
 
 function find_minimum(s, current_substrs, current_index){
@@ -192,22 +227,6 @@ function find_minimum(s, current_substrs, current_index){
         // Restore sequence data
         current_substrs.pop()
     })
-}
-
-function get_all_substrings(user_string){
-    unused_substrings = []
-    let substrings = []
-
-    WORD_DB.forEach(card_name => {
-        // Find substrings in a word
-        let card_substring_array = get_substrings(user_string, card_name)
-        card_substring_array.forEach(substr => {
-            // Try add to substring in array
-            add_substring(substrings, substr)
-        })
-    })
-
-    return substrings
 }
 
 function add_substring(substr_array, substr){
@@ -245,7 +264,6 @@ function get_substrings(user_string, card_name){
             while(card_index + card_strlen < card_name.length && user_index + user_strlen < user_string.length){
                 let card_char = card_name[card_index + card_strlen]
                 let user_char = user_string[user_index + user_strlen]
-                let char_removable = false
                 
                 // If next char is removable, include it
                 // Also check if exceed array length
@@ -261,7 +279,7 @@ function get_substrings(user_string, card_name){
                 }
 
                 // If found substring
-                if (card_char.toLowerCase() === user_char.toLowerCase() || char_removable){
+                if (card_char.toLowerCase() === user_char.toLowerCase()){
                     // Check if front card
                     if (user_index == 0 && card_index != 0)
                         break
