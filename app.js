@@ -8,6 +8,7 @@ let minimum_length_substrings = []
 let user_string
 let substrings
 let db_index
+let dfs_memo
 let user_lang = window.navigator.language.slice(0, 2)
 
 const LANG = {
@@ -83,6 +84,7 @@ function reset_page(){
     db_index = 0
     minimum_length_value = 9999999
     minimum_length_substrings = []
+    dfs_memo = {}
 }
 
 function get_color(){
@@ -278,6 +280,22 @@ function display_collage(){
 }
 
 function find_minimum(s, current_substrs, current_index){
+    // Check if better seq exist
+    // First, check if memo exist
+    if (dfs_memo[current_index]){
+        // If this is more efficient
+        if (dfs_memo[current_index] > current_substrs.length){
+            dfs_memo[current_index] = current_substrs.length
+        }
+        else {  // If better one exist
+            return
+        }
+    }
+    else {    // memo does not exist
+        dfs_memo[current_index] = current_substrs.length
+    }
+
+
     let substr_has_index = []
     s.forEach(substr => {
         if (substr.has_index(current_index))
