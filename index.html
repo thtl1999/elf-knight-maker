@@ -1,30 +1,38 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-        <!-- Global site tag (gtag.js) - Google Analytics -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="엘프검사, 엘프, 검사, 메이커, 유희왕, 카드, 콜라주">
+    <meta name="description" content="엘프검사 메이커: 유희왕 카드 콜라주 만들기">
+    <meta name="robots" content="index">
+    <meta property="og:image" content="./assets/elf-knight2x.png">
+    <meta property="og:description" content="엘프검사 메이커: 유희왕 카드 콜라주 만들기">
+    <title>엘프 검사 메이커</title>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-90972010-2"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'UA-90972010-2');
     </script>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="엘프검사 ,엘프 ,검사 ,메이커 ,유희왕 ,카드 ,콜라주">
-    <meta name="description" content="유희왕 카드 콜라주">
-    <meta name="robots" content="index">
-    <meta property="og:image" content="./assets/elf-knight2x.png">
-    <meta property="og:description" content="유희왕 카드 콜라주 생성기">
-    <title>엘프 검사 메이커</title>
+    
     <script async src="./app.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <a target="_blank" href="https://thtl1999.github.io/God-sejong/"><img style="opacity: 0.5;" src="./assets/sejong-small.png" alt="sejong translator"></a>
-    <h1>엘프 검사 메이커</h1>
+    <h1 id="title">엘프 검사 메이커</h1>
+    <div>
+        <select name="lang" id="lang" onchange="change_language(this.value)">
+            <option value="ko">Korean</option>
+            <option value="en">English</option>
+            <option value="ja">Japanese</option>
+        </select>
+    </div>
+    
     <a target="_blank" href="https://github.com/thtl1999/elf-knight-maker"><img src="./assets/elf-knight2x.png" alt="elf knight"></a>
     <form onsubmit="return make_collage_start()">
         <input type="text" name="" id="user-string" value="DDR 준비운동 없이 엔디미온 도전하다가 왼쪽 다리 오른쪽 다리 부상 입은 엘프 검사">

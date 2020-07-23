@@ -1,26 +1,87 @@
 let WORD_DB
 let colors = ['#730240', '#304173', '#F2CB05', '#594B04', '#0D0D0D']
 let color_index = 0
-const removable_chars = [' ', '·', '－', '.', '「', '」', '.']
+const removable_chars = [' ', '·', '・', '－', '.', '「', '」', '.']
 let unused_substrings = []
 let minimum_length_value = 9999999
 let minimum_length_substrings = []
 let user_string
 let substrings
 let db_index
+let user_lang = window.navigator.language.slice(0, 2)
 
+const LANG = {
+    'ko': {
+        'title': '엘프검사 메이커',
+        'lang': 0,
+        'reset': '리셋',
+        'search': '카드 검색',
+        'example': 'DDR 준비운동 없이 엔디미온 도전하다가 왼쪽 다리 오른쪽 다리 부상 입은 엘프 검사',
+        'no_word': ' 문자를 가진 카드가 없습니다',
+        'no_word_first': ' 문자로 시작하는 카드가 없습니다',
+        'no_word_last': ' 문자로 끝나는 카드가 없습니다'
+    },
+    'en': {
+        'title': 'Celtic Guardian Generator',
+        'lang': 1,
+        'reset': 'CLEAR',
+        'search': 'GENERATE',
+        'example': 'DDR Endymion performed without warm-up caused Left Leg and Right Leg injured Celtic Guardian',
+        'no_word': ' character cannot be found in card list',
+        'no_word_first': ' character cannot be found in any card start with',
+        'no_word_last': ' character cannot be found in any card end with'
+    },
+    'ja': {
+        'title': 'エルフの剣士 ジェネレーター',
+        'lang': 2,
+        'reset': 'リセット',
+        'search': 'GO!',
+        'example': 'DDR 準備運動なしエンディミオン挑戦している中左足右足負傷したエルフの剣士',
+        'no_word': ' 文字が付いているカードがありません',
+        'no_word_first': ' 文字で始まるカードがありません',
+        'no_word_last': ' 文字で終わるカードがありません'
+    }
+}
 
-fetch('./cardnames.json')
+fetch('./cards.json')
     .then(response => {
         return response.json();
     })
     .then(function(word_json) {
-        WORD_DB = [...new Set(word_json)]
+        WORD_DB = word_json
     })
+
+
+function change_language(lang){
+    reset_all()
+    document.title = LANG[lang].title
+    document.getElementById('title').innerText = LANG[lang].title
+    document.getElementById('reset-button').innerText = LANG[lang].reset
+    document.getElementById('start-button').innerText = LANG[lang].search
+    document.getElementById('user-string').value = LANG[lang].example
+    document.getElementById('lang').selectedIndex = LANG[lang].lang
+    user_lang = lang
+}
+
 
 function reset_all(){
     document.getElementById('user-string').value = ''
     reset_page()
+}
+
+function reset_page(){
+    // Initialize HTML
+    let p = document.getElementById('colored-text')
+    p.innerText = ''
+    let ol = document.getElementById('card-list')
+    ol.innerHTML = ''
+
+    // Initialize params
+    unused_substrings = []
+    substrings = []
+    db_index = 0
+    minimum_length_value = 9999999
+    minimum_length_substrings = []
 }
 
 function get_color(){
@@ -50,11 +111,16 @@ function add_ol(){
 
     minimum_length_substrings.forEach(substr =>{
         let li = document.createElement('li')
+        let a = document.createElement('a')
         let [front, middle, end] = substr.get_sliced()
+        let href = substr.get_url()
 
-        li.appendChild(create_grey_span(front))
-        li.appendChild(create_color_span(middle))
-        li.appendChild(create_grey_span(end))
+        a.appendChild(create_grey_span(front))
+        a.appendChild(create_color_span(middle))
+        a.appendChild(create_grey_span(end))
+        a.href = href
+        a.target = '_blank'
+        li.appendChild(a)
         ol.appendChild(li)
     })
 }
@@ -74,8 +140,9 @@ function create_grey_span(text){
 }
 
 class Substr{
-    constructor(card_name, card_start, card_end, user_start, user_end){
+    constructor(card_name, card_url, card_start, card_end, user_start, user_end){
         this.card_name = card_name
+        this.card_url = card_url
         this.card_start = card_start
         this.card_end = card_end
         this.user_start = user_start
@@ -107,16 +174,20 @@ class Substr{
 
         return [front, middle, end]
     }
+
+    get_url(){
+        return this.card_url
+    }
 }
 
 function display_impossible(user_string, problem_index){
     let problem_char = user_string[problem_index]
 
-    let error_text = ' 문자를 가진 카드가 없습니다'
+    let error_text = LANG[user_lang]['no_word']
     if (problem_index === 0)
-        error_text = ' 문자로 시작하는 카드가 없습니다'
+        error_text = LANG[user_lang]['no_word_first']
     if (problem_index === user_string.length - 1)
-        error_text = ' 문자로 끝나는 카드가 없습니다'
+        error_text = LANG[user_lang]['no_word_last']
 
     color_index = -1
     let p = document.getElementById('colored-text')
@@ -125,20 +196,6 @@ function display_impossible(user_string, problem_index){
 
 }
 
-function reset_page(){
-    // Initialize HTML
-    let p = document.getElementById('colored-text')
-    p.innerText = ''
-    let ol = document.getElementById('card-list')
-    ol.innerHTML = ''
-
-    // Initialize params
-    unused_substrings = []
-    substrings = []
-    db_index = 0
-    minimum_length_value = 9999999
-    minimum_length_substrings = []
-}
 
 function make_collage_start(){
     // Initialize app
@@ -156,7 +213,7 @@ function make_collage_start(){
 
 function get_all_substrings(){
     // If not finished, queue next work
-    if (db_index < WORD_DB.length){
+    if (db_index < WORD_DB[user_lang].length){
         setTimeout(get_all_substrings)
     }
     else{
@@ -167,12 +224,12 @@ function get_all_substrings(){
     }
 
     // Without epoch, works are so slow
-    let epoch = 100
+    let epoch = 123
     let epoch_index = 0
 
-    while(db_index < WORD_DB.length && epoch_index++ < epoch){
+    while(db_index < WORD_DB[user_lang].length && epoch_index++ < epoch){
         // find substring for cards
-        let card_substring_array = get_substrings(user_string, WORD_DB[db_index++])
+        let card_substring_array = get_substrings(user_string, WORD_DB[user_lang][db_index++])
         for (const card_substring of card_substring_array){
             // Try add to substring in array
             add_substring(substrings, card_substring)
@@ -183,7 +240,7 @@ function get_all_substrings(){
 
 function display_progress(){
     const p = document.getElementById('colored-text')
-    p.innerText = `${db_index} / ${WORD_DB.length}`
+    p.innerText = `${db_index} / ${WORD_DB[user_lang].length}`
 }
 
 function delete_progress(){
@@ -268,7 +325,8 @@ function add_substring(substr_array, substr){
     substr_array.push(substr)
 }
 
-function get_substrings(user_string, card_name){
+function get_substrings(user_string, card){
+    let card_name = card.N
     let substr_array = []
 
     for(let card_index = 0; card_index < card_name.length; card_index++){
@@ -307,7 +365,7 @@ function get_substrings(user_string, card_name){
                     if (user_index + user_strlen == user_string.length - 1 && card_index + card_strlen != card_name.length - 1)
                         break
 
-                    let substr = new Substr(card_name, card_index, card_index + card_strlen, user_index, user_index + user_strlen)
+                    let substr = new Substr(card_name, card.U, card_index, card_index + card_strlen, user_index, user_index + user_strlen)
                     add_substring(substr_array, substr)
                 }
                 else
@@ -324,4 +382,13 @@ function get_substrings(user_string, card_name){
 
 function is_removable(char){
     return removable_chars.includes(char)
+}
+
+window.onload = () => {
+    if (['ko','en','ja'].includes(user_lang)){
+        change_language(user_lang)
+    }
+    else{
+        change_language('en')
+    }
 }

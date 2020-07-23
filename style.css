@@ -4,7 +4,7 @@ body{
 }
 
 form{
-    margin-top: 50px;
+    margin-top: 20px;
     vertical-align: middle;
 }
 
@@ -17,6 +17,7 @@ input{
 button{
     font-weight: 600;
     font-size: x-large;
+    margin: 10px;
 }
 
 p{
@@ -28,4 +29,16 @@ ol{
     padding-left: 0;
     list-style-position: inside;
     font-size: x-large;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1{
+    margin: 0px;
+}
+
+img{
+    margin: 20px;
 }
