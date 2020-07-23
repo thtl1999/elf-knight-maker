@@ -49,6 +49,7 @@ fetch('./cards.json')
     })
     .then(function(word_json) {
         WORD_DB = word_json
+        document.getElementById('start-button').disabled = false
     })
 
 
